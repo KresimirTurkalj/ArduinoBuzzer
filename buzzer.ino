@@ -120,8 +120,8 @@ byte* readEEPROM(unsigned int eeaddress, unsigned int num_chars)
   byte* data = new byte[num_chars];
   byte i = 0;
   Wire.beginTransmission(ADDRESS);
-  Wire.write((int)(eeaddress >> 8));   // MSB
-  Wire.write((int)(eeaddress & 0xFF)); // LSB
+  Wire.write((int)(ADDRESS >> 8));   // MSB
+  Wire.write((int)(ADDRESS & 0xFF)); // LSB
   Wire.endTransmission();
 
   Wire.requestFrom(deviceaddress, num_chars);
