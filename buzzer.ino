@@ -1,15 +1,12 @@
 #define DEBOUNCE_DELAY 500
 #define TONE_PIN 5
 #define N_SONGS 18
-#define GO_PIN 11
-#define UP_PIN 10
-#define DOWN_PIN 9
-#define STOP_PIN 8
+#define GO_PIN 4
+#define UP_PIN 2
+#define DOWN_PIN 3
 #define ADDRESS 0x50
 
 #include <Wire.h>
-#include "songs.h"
-#include "pitches.h"
 
 byte index = 0;
 
@@ -25,15 +22,16 @@ short int readingGo;
 short int readingUp;
 short int readingDown;
 
-short int lastGoButtonState = LOW;
-short int lastUpButtonState = LOW;
-short int lastDownButtonState = LOW;
+short int lastGoButtonState = HIGH;
+short int lastUpButtonState = HIGH;
+short int lastDownButtonState = HIGH;
 
 void setup()
 {
-  pinMode(UP_PIN, INPUT);
-  pinMode(DOWN_PIN, INPUT);
-  pinMode(GO_PIN, INPUT);
+  Wire.begin();
+  pinMode(UP_PIN, INPUT_PULLUP);
+  pinMode(DOWN_PIN, INPUT_PULLUP);
+  pinMode(GO_PIN, INPUT_PULLUP);
   pinMode(TONE_PIN, OUTPUT);
 }
 
@@ -63,13 +61,14 @@ bool CheckGo()
 {
   if (readingGo != lastGoButtonState) {
     lastGoDebounceTime = millis();
+    lastGoButtonState = readingGo;
   }
   if (millis() - lastGoDebounceTime > DEBOUNCE_DELAY)
   {
     if (readingGo != buttonGoState)
     {
       buttonGoState = readingGo;
-      if (buttonGoState == HIGH) {
+      if (buttonGoState == LOW) {
         return true;
       }
     }
@@ -81,13 +80,14 @@ bool CheckDown()
 {
   if (readingDown != lastDownButtonState) {
     lastDownDebounceTime = millis();
+    lastDownButtonState = readingDown;
   }
   if (millis() - lastDownDebounceTime > DEBOUNCE_DELAY)
   {
     if (readingDown != buttonDownState)
     {
       buttonDownState = readingDown;
-      if (buttonDownState == HIGH)
+      if (buttonDownState == LOW)
       {
         return true;
       }
@@ -100,13 +100,14 @@ bool CheckUp()
 {
   if (readingUp != lastUpButtonState) {
     lastUpDebounceTime = millis();
+    lastUpButtonState = readingUp;
   }
   if (millis() - lastUpDebounceTime > DEBOUNCE_DELAY)
   {
     if (readingUp != buttonUpState)
     {
       buttonUpState = readingUp;
-      if (buttonUpState == HIGH)
+      if (buttonUpState == LOW)
       {
         return true;
       }
@@ -115,92 +116,126 @@ bool CheckUp()
   return false;
 }
 
-byte* readEEPROM(unsigned int eeaddress, unsigned int num_chars)
-{
-  byte* data = new byte[num_chars];
-  byte i = 0;
-  Wire.beginTransmission(ADDRESS);
-  Wire.write((int)(ADDRESS >> 8));   // MSB
-  Wire.write((int)(ADDRESS & 0xFF)); // LSB
-  Wire.endTransmission();
-
-  Wire.requestFrom(deviceaddress, num_chars);
-
-  while (Wire.available()) data[i++] = Wire.read();
-  return data;
-}
-
-byte* GetSongData( byte* song, int* songLength) {
-  switch (index) {
-    case 0 :
-      song = readEEPROM(0, 102);
-      *songLength = 51;
-      break;
-    case 1 : song = readEEPROM(102, 122);
-      *songLength = 61;
-      break;
-    case 2 : song = readEEPROM(224, 110);
-      *songLength = 55;
-      break;
-    case 3 : song = readEEPROM(334, 54);
-      *songLength = 27;
-      break;
-    case 4 : song = readEEPROM(388, 60);
-      *songLength = 30;
-      break;
-    case 5 : song = readEEPROM(448, 94);
-      *songLength = 47;
-      break;
-    case 6 : song = readEEPROM(542, 104);
-      *songLength = 52;
-      break;
-    case 7 : song = readEEPROM(646, 84);
-      *songLength = 42;
-      break;
-    case 8 : song = readEEPROM(730, 60);
-      *songLength = 30;
-      break;
-    case 9 : song = readEEPROM(790, 58);
-      *songLength = 29;
-      break;
-    case 10: song = readEEPROM(848, 64);
-      *songLength = 32;
-      break;
-    case 11: song = readEEPROM(912, 56);
-      *songLength = 28;
-      break;
-    case 12: song = readEEPROM(968, 84);
-      *songLength = 42;
-      break;
-    case 13: song = readEEPROM(1052, 56);
-      *songLength = 28;
-      break;
-    case 14: song = readEEPROM(1108, 48);
-      *songLength = 24;
-      break;
-    case 15: song = readEEPROM(1156, 108);
-      *songLength = 54;
-      break;
-    case 16: song = readEEPROM(1264, 88);
-      *songLength = 44;
-      break;
-    case 17: song = readEEPROM(1352, 64);
-      *songLength = 32;
-      break;
-  }
-}
-
 void PlaySong()
 {
-  byte* song;
-  int* songLength = new int;
-  GetSongData(song, songLength);
-  for (int i = 0; i < *songLength; i++)
+  int* song;
+  int songLength, frequency, duration;
+  song = GetSongData(&songLength);
+  for (int i = 0; i < songLength; i++)
   {
-    tone(TONE_PIN, song[i] * 4, song[i + *songLength] * 10);
-    delay(song[i + *songLength] * 11);
+    frequency = song[i];
+    duration = song[i + songLength];
+    tone(TONE_PIN, frequency, duration);
+    delay(duration * 1.1);
     noTone(TONE_PIN);
   }
   delete song;
-  delete songLength;
 }
+
+int* GetSongData(int* songLength) {
+  byte* song;
+  int startEE, remainChars, pageLoad, passedChars = 0;
+  switch (index) {
+    case 0 : *songLength = 51;
+      startEE = 0;
+      break;
+    case 1 : *songLength = 61;
+      startEE = 204;
+      break;
+    case 2 : *songLength = 55;
+      startEE = 448;
+      break;
+    case 3 : *songLength = 27;
+      startEE = 668;
+      break;
+    case 4 : *songLength = 30;
+      startEE = 776;
+      break;
+    case 5 : *songLength = 47;
+      startEE = 896;
+      break;
+    case 6 : *songLength = 52;
+      startEE = 1084;
+      break;
+    case 7 : *songLength = 42;
+      startEE = 1292;
+      break;
+    case 8 : *songLength = 30;
+      startEE = 1460;
+      break;
+    case 9 : *songLength = 29;
+      startEE = 1580;
+      break;
+    case 10: *songLength = 32;
+      startEE = 1696;
+      break;
+    case 11: *songLength = 28;
+      startEE = 1824;
+      break;
+    case 12: *songLength = 42;
+      startEE = 1936;
+      break;
+    case 13: *songLength = 28;
+      startEE = 2108;
+      break;
+    case 14: *songLength = 24;
+      startEE = 2216;
+      break;
+    case 15: *songLength = 54;
+      startEE = 2312;
+      break;
+    case 16: *songLength = 44;
+      startEE = 2528;
+      break;
+    case 17: *songLength = 32;
+      startEE = 2704;
+      break;
+  }
+  song = new byte[*songLength * 4];
+  remainChars = *songLength * 4;
+  while(remainChars > 0){
+    if(remainChars > 32){
+      remainChars -= 32;
+      pageLoad = 32;
+    }
+    else{
+      pageLoad = remainChars;
+      remainChars = 0;
+    }
+    readEEPROM(startEE, song, passedChars, pageLoad);
+    passedChars += pageLoad;
+    startEE += pageLoad;
+  }
+  return ByteToIntArray(song, *songLength * 2);
+}
+
+int* ByteToIntArray(byte* byteArray, int intSize) {
+  int j = 0;
+  byte high, low;
+  int* intArray = new int[intSize];
+  for (int i = 0; i < intSize; i++) {
+    high = byteArray[j];
+    low = byteArray[j + 1];
+    intArray[i] = (((int)high<<8) | (int)low );
+    j += 2;
+  }
+  delete byteArray;
+  return intArray;
+}
+
+void readEEPROM(int eeaddress, byte* data, byte i, int num_chars)
+{
+  Wire.beginTransmission(ADDRESS);
+
+  Wire.write((int)(eeaddress >> 8));   // MSB
+  Wire.write((int)(eeaddress & 0xFF)); // LSB
+  Wire.endTransmission();
+  
+  Wire.requestFrom(ADDRESS, num_chars);
+  
+  while (Wire.available()) {
+    data[i++] = Wire.read();
+  }
+}
+
+

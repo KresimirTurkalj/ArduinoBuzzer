@@ -1,152 +1,143 @@
 #include <Wire.h>
 #include "songs.h"
-#define eeprom1 0x50    //Address of 24LC256 eeprom1, eeprom chip
+#define ADDRESS 0x50    //Address of 24LC256 ADDRESS, eeprom chip
 
-void writeEEPROM(int deviceaddress, unsigned int eeaddress, byte* data);
-byte readEEPROM(int deviceaddress, unsigned int eeaddress );
-
-void setup(){
-  Serial.begin(9600);
-  unsigned int ee = 0, write_size = 0;
-  for(int i=0; i<N_SONGS; i++){
-    switch(i){
-      case 0:  writeEEPROM(eeprom1, ee + write_size, JingleBells);    // ee = 0 -> 101
-               write_size += sizeof(JingleBells); 
-               break;
-      case 1:  writeEEPROM(eeprom1, ee + write_size, OldMcDonald);    // ee = 102 -> 223
-               write_size += sizeof(OldMcDonald); 
-               break;
-      case 2:  writeEEPROM(eeprom1, ee + write_size, YankeeDoodle);   // ee = 224 -> 333
-               write_size += sizeof(YankeeDoodle); 
-               break;
-      case 3:  writeEEPROM(eeprom1, ee + write_size, RowYourBoat);    // ee = 334 -> 387
-               write_size += sizeof(RowYourBoat); 
-               break;
-      case 4:  writeEEPROM(eeprom1, ee + write_size, WeWishYou);      // ee = 388 -> 447
-               write_size += sizeof(WeWishYou); 
-               break;
-      case 5:  writeEEPROM(eeprom1, ee + write_size, ItsyBitsy);      // ee = 448 -> 541
-               write_size += sizeof(ItsyBitsy); 
-               break;
-      case 6:  writeEEPROM(eeprom1, ee + write_size, BlackSheep);     // ee = 542 -> 645
-               write_size += sizeof(BlackSheep); 
-               break;
-      case 7:  writeEEPROM(eeprom1, ee + write_size, TwinkleTwinkle); // ee = 646 -> 729
-               write_size += sizeof(TwinkleTwinkle); 
-               break;
-      case 8:  writeEEPROM(eeprom1, ee + write_size, SvetiNikola);    // ee = 730 -> 789
-               write_size += sizeof(SvetiNikola); 
-               break;
-      case 9:  writeEEPROM(eeprom1, ee + write_size, JesteLIkad);     // ee = 790 -> 847
-               write_size += sizeof(JesteLIkad); 
-               break;
-      case 10: writeEEPROM(eeprom1, ee + write_size, HopaCupa);       // ee = 848 -> 911
-               write_size += sizeof(HopaCupa); 
-               break;
-      case 11: writeEEPROM(eeprom1, ee + write_size, IgraKolo);       // ee = 912 -> 967
-               write_size += sizeof(IgraKolo); 
-               break;
-      case 12: writeEEPROM(eeprom1, ee + write_size, Pile);           // ee = 968 -> 1051
-               write_size += sizeof(Pile); 
-               break;
-      case 13: writeEEPROM(eeprom1, ee + write_size, Maca);           // ee = 1052 -> 1107
-               write_size += sizeof(Maca); 
-               break;
-      case 14: writeEEPROM(eeprom1, ee + write_size, CistaCica);      // ee = 1108 -> 1155
-               write_size += sizeof(CistaCica); 
-               break;
-      case 15: writeEEPROM(eeprom1, ee + write_size, MojKonjic);      // ee = 1156 -> 1263
-               write_size += sizeof(MojKonjic); 
-               break;
-      case 16: writeEEPROM(eeprom1, ee + write_size, Jesenska);       // ee = 1264 -> 1351
-               write_size += sizeof(Jesenska); 
-               break;
-      case 17: writeEEPROM(eeprom1, ee + write_size, DjecaMaca);      // ee = 1352 -> 1415
-               write_size += sizeof(DjecaMaca); 
-               break; 
+void setup() {
+  Wire.begin();
+  unsigned int ee = 0, writePos = 0, arraySize = 0;
+  for (int i = 0; i < N_SONGS; i++) {
+    switch (i) {
+      case 0:  arraySize = sizeof(JingleBells);
+        writeEEPROM(ee + writePos, IntToByteArray(JingleBells, arraySize), arraySize);    // ee = 0 -> 203
+        break;
+      case 1:  arraySize = sizeof(OldMcDonald);
+        writeEEPROM(ee + writePos, IntToByteArray(OldMcDonald, arraySize), arraySize);    // ee = 204 -> 447
+        break;
+      case 2: arraySize = sizeof(YankeeDoodle);
+        writeEEPROM(ee + writePos, IntToByteArray(YankeeDoodle, arraySize), arraySize);   // ee = 448 -> 667
+        break;
+      case 3: arraySize = sizeof(RowYourBoat);
+        writeEEPROM(ee + writePos, IntToByteArray(RowYourBoat, arraySize), arraySize);    // ee = 668 -> 775
+        break;
+      case 4: arraySize = sizeof(WeWishYou);
+        writeEEPROM(ee + writePos, IntToByteArray(WeWishYou, arraySize), arraySize);      // ee = 776 -> 895
+        break;
+      case 5: arraySize = sizeof(ItsyBitsy);
+        writeEEPROM(ee + writePos, IntToByteArray(ItsyBitsy, arraySize), arraySize);      // ee = 896 -> 1083
+        break;
+      case 6: arraySize = sizeof(BlackSheep);
+        writeEEPROM(ee + writePos, IntToByteArray(BlackSheep, arraySize), arraySize);     // ee = 1084 -> 1291
+        break;
+      case 7: arraySize = sizeof(TwinkleTwinkle);
+        writeEEPROM(ee + writePos, IntToByteArray(TwinkleTwinkle, arraySize), arraySize); // ee = 1292 -> 1459
+        break;
+      case 8: arraySize = sizeof(SvetiNikola);
+        writeEEPROM(ee + writePos, IntToByteArray(SvetiNikola, arraySize), arraySize);    // ee = 1460 -> 1579
+        break;
+      case 9: arraySize = sizeof(JesteLIkad);
+        writeEEPROM(ee + writePos, IntToByteArray(JesteLIkad, arraySize), arraySize);     // ee = 1580 -> 1695
+        break;
+      case 10: arraySize = sizeof(HopaCupa);
+        writeEEPROM(ee + writePos, IntToByteArray(HopaCupa, arraySize), arraySize);       // ee = 1696 -> 1823
+        break;
+      case 11: arraySize = sizeof(IgraKolo);
+        writeEEPROM(ee + writePos, IntToByteArray(IgraKolo, arraySize), arraySize);       // ee = 1824 -> 1935
+        break;
+      case 12: arraySize = sizeof(Pile);
+        writeEEPROM(ee + writePos, IntToByteArray(Pile, arraySize), arraySize);           // ee = 1936 -> 2103
+        break;
+      case 13: arraySize = sizeof(Maca);
+        writeEEPROM(ee + writePos, IntToByteArray(Maca, arraySize), arraySize);           // ee = 2104 -> 2215
+        break;
+      case 14: arraySize = sizeof(CistaCica);
+        writeEEPROM(ee + writePos, IntToByteArray(CistaCica, arraySize), arraySize);      // ee = 2216 -> 2311
+        break;
+      case 15: arraySize = sizeof(MojKonjic);
+        writeEEPROM(ee + writePos, IntToByteArray(MojKonjic, arraySize), arraySize);      // ee = 2312 -> 2527
+        break;
+      case 16: arraySize = sizeof(Jesenska);
+        writeEEPROM(ee + writePos, IntToByteArray(Jesenska, arraySize), arraySize);       // ee = 2528 -> 2703
+        break;
+      case 17: arraySize = sizeof(DjecaMaca);
+        writeEEPROM(ee + writePos, IntToByteArray(DjecaMaca, arraySize), arraySize);      // ee = 2704 -> 2831
+        break;
     }
-  Serial.print("Velicina: ");
-  Serial.println(write_size + ee);
+    writePos += arraySize;
   }
 }
 
-void loop(){}
+void loop() {}
 
-void writeEEPROM(int deviceaddress, unsigned int eeaddress, byte* data) 
+byte* IntToByteArray(int* intArray, int arraySize) {
+  byte high, low;
+  int j = 0;
+  byte* byteArray = new byte[arraySize];
+  for (int i = 0; i < arraySize/2; i++) {
+    high = (byte) ((intArray[i] >> 8));
+    low = (byte) (intArray[i] & 0xFF);
+    byteArray[j] = high;
+    byteArray[j + 1] = low;
+    j += 2;
+  }
+  return byteArray;
+}
+
+void writeEEPROM(unsigned int eeaddress, byte* data, unsigned int data_len)
 {
   // Uses Page Write for 24LC256
   // Allows for 64 byte page boundary
   // Splits string into max 16 byte writes
-  byte i=0, counter=0;
+  byte i = 0, counter = 0;
   unsigned int  address;
   unsigned int  page_space;
-  unsigned int  page=0;
+  unsigned int  page = 0;
   unsigned int  num_writes;
-  unsigned int  data_len=0;
   byte first_write_size;
-  byte last_write_size;  
-  byte write_size;  
+  byte last_write_size;
+  byte write_size;
   
-  // Calculate length of data
-  do{ data_len++; } while(data[data_len]);   
-   
   // Calculate space available in first page
-  page_space = int(((eeaddress/64) + 1)*64)-eeaddress;
+  page_space = int(((eeaddress / 64) + 1) * 64) - eeaddress;
 
   // Calculate first write size
-  if (page_space>16){
-     first_write_size=page_space-((page_space/16)*16);
-     if (first_write_size==0) first_write_size=16;
-  }   
-  else 
-     first_write_size=page_space; 
-    
-  // calculate size of last write  
-  if (data_len>first_write_size) 
-     last_write_size = (data_len-first_write_size)%16;   
-  
-  // Calculate how many writes we need
-  if (data_len>first_write_size)
-     num_writes = ((data_len-first_write_size)/16)+2;
-  else
-     num_writes = 1;  
-     
-  i=0;   
-  address=eeaddress;
-  for(page=0;page<num_writes;page++) 
-  {
-     if(page==0) write_size=first_write_size;
-     else if(page==(num_writes-1)) write_size=last_write_size;
-     else write_size=16;
-  
-     Wire.beginTransmission(deviceaddress);
-     Wire.write((int)((address) >> 8));   // MSB
-     Wire.write((int)((address) & 0xFF)); // LSB
-     counter=0;
-     do{ 
-        Wire.write((byte) data[i]);
-        i++;
-        counter++;
-     } while((data[i]) && (counter<write_size));  
-     Wire.endTransmission();
-     address+=write_size;   // Increment address for next write
-     
-     delay(6);  // needs 5ms for page write
+  if (page_space > 16) {
+    first_write_size = page_space - ((page_space / 16) * 16);
+    if (first_write_size == 0) first_write_size = 16;
   }
-}
+  else
+    first_write_size = page_space;
 
-byte readEEPROM(int deviceaddress, unsigned int eeaddress ) 
-{
-  byte rdata = 0xFF;
- 
-  Wire.beginTransmission(deviceaddress);
-  Wire.write((int)(eeaddress >> 8));   // MSB
-  Wire.write((int)(eeaddress & 0xFF)); // LSB
-  Wire.endTransmission();
- 
-  Wire.requestFrom(deviceaddress,1);
- 
-  if (Wire.available()) rdata = Wire.read();
- 
-  return rdata;
+  // calculate size of last write
+  if (data_len > first_write_size)
+    last_write_size = (data_len - first_write_size) % 16;
+
+  // Calculate how many writes we need
+  if (data_len > first_write_size)
+    num_writes = ((data_len - first_write_size) / 16) + 2;
+  else
+    num_writes = 1;
+
+  i = 0;
+  address = eeaddress;
+  for (page = 0; page < num_writes; page++)
+  {
+    if (page == 0) write_size = first_write_size;
+    else if (page == (num_writes - 1)) write_size = last_write_size;
+    else write_size = 16;
+
+    Wire.beginTransmission(ADDRESS);
+    Wire.write((int)((address) >> 8));   // MSB
+    Wire.write((int)((address) & 0xFF)); // LSB
+    counter = 0;
+    do {
+      Wire.write((byte)data[i]);
+      i++;
+      counter++;
+    } while ((i<data_len) && (counter < write_size));
+    Wire.endTransmission();
+    address += write_size; // Increment address for next write
+    
+    delay(6);  // needs 5ms for page write
+  }
+  delete data;
 }
