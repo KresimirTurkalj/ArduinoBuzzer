@@ -32,34 +32,34 @@ void setup() {
         writeEEPROM(ee + writePos, IntToByteArray(TwinkleTwinkle, arraySize), arraySize); // ee = 1292 -> 1459
         break;
       case 8: arraySize = sizeof(SvetiNikola);
-        writeEEPROM(ee + writePos, IntToByteArray(SvetiNikola, arraySize), arraySize);    // ee = 1460 -> 1579
+        writeEEPROM(ee + writePos, IntToByteArray(SvetiNikola, arraySize), arraySize);    // ee = 1460 -> 1699
         break;
       case 9: arraySize = sizeof(JesteLIkad);
-        writeEEPROM(ee + writePos, IntToByteArray(JesteLIkad, arraySize), arraySize);     // ee = 1580 -> 1695
+        writeEEPROM(ee + writePos, IntToByteArray(JesteLIkad, arraySize), arraySize);     // ee = 1700 -> 1815
         break;
       case 10: arraySize = sizeof(HopaCupa);
-        writeEEPROM(ee + writePos, IntToByteArray(HopaCupa, arraySize), arraySize);       // ee = 1696 -> 1823
+        writeEEPROM(ee + writePos, IntToByteArray(HopaCupa, arraySize), arraySize);       // ee = 1816 -> 1943
         break;
       case 11: arraySize = sizeof(IgraKolo);
-        writeEEPROM(ee + writePos, IntToByteArray(IgraKolo, arraySize), arraySize);       // ee = 1824 -> 1935
+        writeEEPROM(ee + writePos, IntToByteArray(IgraKolo, arraySize), arraySize);       // ee = 1944 -> 2167
         break;
       case 12: arraySize = sizeof(Pile);
-        writeEEPROM(ee + writePos, IntToByteArray(Pile, arraySize), arraySize);           // ee = 1936 -> 2103
+        writeEEPROM(ee + writePos, IntToByteArray(Pile, arraySize), arraySize);           // ee = 2168 -> 2335
         break;
       case 13: arraySize = sizeof(Maca);
-        writeEEPROM(ee + writePos, IntToByteArray(Maca, arraySize), arraySize);           // ee = 2104 -> 2215
+        writeEEPROM(ee + writePos, IntToByteArray(Maca, arraySize), arraySize);           // ee = 2336 -> 2447
         break;
       case 14: arraySize = sizeof(CistaCica);
-        writeEEPROM(ee + writePos, IntToByteArray(CistaCica, arraySize), arraySize);      // ee = 2216 -> 2311
+        writeEEPROM(ee + writePos, IntToByteArray(CistaCica, arraySize), arraySize);      // ee = 2448 -> 2639
         break;
       case 15: arraySize = sizeof(MojKonjic);
-        writeEEPROM(ee + writePos, IntToByteArray(MojKonjic, arraySize), arraySize);      // ee = 2312 -> 2527
+        writeEEPROM(ee + writePos, IntToByteArray(MojKonjic, arraySize), arraySize);      // ee = 2640 -> 2855
         break;
       case 16: arraySize = sizeof(Jesenska);
-        writeEEPROM(ee + writePos, IntToByteArray(Jesenska, arraySize), arraySize);       // ee = 2528 -> 2703
+        writeEEPROM(ee + writePos, IntToByteArray(Jesenska, arraySize), arraySize);       // ee = 2856 -> 3031
         break;
       case 17: arraySize = sizeof(DjecaMaca);
-        writeEEPROM(ee + writePos, IntToByteArray(DjecaMaca, arraySize), arraySize);      // ee = 2704 -> 2831
+        writeEEPROM(ee + writePos, IntToByteArray(DjecaMaca, arraySize), arraySize);      // ee = 3032 -> 3159
         break;
     }
     writePos += arraySize;

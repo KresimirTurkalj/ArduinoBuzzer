@@ -1,4 +1,4 @@
-#define DEBOUNCE_DELAY 500
+#define DEBOUNCE_DELAY 100
 #define TONE_PIN 5
 #define N_SONGS 18
 #define GO_PIN 4
@@ -9,6 +9,7 @@
 #include <Wire.h>
 
 byte index = 0;
+bool goState = false;
 
 unsigned long lastGoDebounceTime = 0;
 unsigned long lastUpDebounceTime = 0;
@@ -37,28 +38,15 @@ void setup()
 
 void loop()
 {
-  readingGo = digitalRead(GO_PIN);
-  readingUp = digitalRead(UP_PIN);
-  readingDown = digitalRead(DOWN_PIN);
-
-  if (CheckGo())
-  {
-    PlaySong();
-  }
-  if (CheckUp())
-  {
-    if (index == N_SONGS - 1) index = 0;
-    else index++;
-  }
-  if (CheckDown())
-  {
-    if (index == 0) index = N_SONGS - 1;
-    else index--;
-  }
+  if (CheckGo()) goState = true;
+  if (CheckUp()) IncrementIndex();
+  if (CheckDown()) DecrementIndex();
+  if (goState) PlaySong();
 }
 
 bool CheckGo()
 {
+  readingGo = digitalRead(GO_PIN);
   if (readingGo != lastGoButtonState) {
     lastGoDebounceTime = millis();
     lastGoButtonState = readingGo;
@@ -78,6 +66,7 @@ bool CheckGo()
 
 bool CheckDown()
 {
+  readingDown = digitalRead(DOWN_PIN);
   if (readingDown != lastDownButtonState) {
     lastDownDebounceTime = millis();
     lastDownButtonState = readingDown;
@@ -96,8 +85,19 @@ bool CheckDown()
   return false;
 }
 
+void IncrementIndex() {
+  if (index == N_SONGS - 1) index = 0;
+  else index++;
+}
+
+void DecrementIndex() {
+  if (index == 0) index = N_SONGS - 1;
+  else index--;
+}
+
 bool CheckUp()
 {
+  readingUp = digitalRead(UP_PIN);
   if (readingUp != lastUpButtonState) {
     lastUpDebounceTime = millis();
     lastUpButtonState = readingUp;
@@ -121,8 +121,21 @@ void PlaySong()
   int* song;
   int songLength, frequency, duration;
   song = GetSongData(&songLength);
+  delay(750);
   for (int i = 0; i < songLength; i++)
   {
+    if (digitalRead(GO_PIN) == LOW) {
+      goState = false;
+      break;
+    }
+    if (digitalRead(UP_PIN) == LOW) {
+      IncrementIndex();
+      break;
+    }
+    if (digitalRead(DOWN_PIN) == LOW) {
+      DecrementIndex();
+      break;
+    }
     frequency = song[i];
     duration = song[i + songLength];
     tone(TONE_PIN, frequency, duration);
@@ -160,45 +173,45 @@ int* GetSongData(int* songLength) {
     case 7 : *songLength = 42;
       startEE = 1292;
       break;
-    case 8 : *songLength = 30;
+    case 8 : *songLength = 60;
       startEE = 1460;
       break;
     case 9 : *songLength = 29;
-      startEE = 1580;
+      startEE = 1700;
       break;
     case 10: *songLength = 32;
-      startEE = 1696;
+      startEE = 1816;
       break;
-    case 11: *songLength = 28;
-      startEE = 1824;
+    case 11: *songLength = 56;
+      startEE = 1944;
       break;
     case 12: *songLength = 42;
-      startEE = 1936;
+      startEE = 2168;
       break;
     case 13: *songLength = 28;
-      startEE = 2108;
+      startEE = 2336;
       break;
-    case 14: *songLength = 24;
-      startEE = 2216;
+    case 14: *songLength = 48;
+      startEE = 2448;
       break;
     case 15: *songLength = 54;
-      startEE = 2312;
+      startEE = 2640;
       break;
     case 16: *songLength = 44;
-      startEE = 2528;
+      startEE = 2856;
       break;
     case 17: *songLength = 32;
-      startEE = 2704;
+      startEE = 3032;
       break;
   }
   song = new byte[*songLength * 4];
   remainChars = *songLength * 4;
-  while(remainChars > 0){
-    if(remainChars > 32){
+  while (remainChars > 0) {
+    if (remainChars > 32) {
       remainChars -= 32;
       pageLoad = 32;
     }
-    else{
+    else {
       pageLoad = remainChars;
       remainChars = 0;
     }
@@ -216,7 +229,7 @@ int* ByteToIntArray(byte* byteArray, int intSize) {
   for (int i = 0; i < intSize; i++) {
     high = byteArray[j];
     low = byteArray[j + 1];
-    intArray[i] = (((int)high<<8) | (int)low );
+    intArray[i] = (((int)high << 8) | (int)low );
     j += 2;
   }
   delete byteArray;
@@ -230,9 +243,9 @@ void readEEPROM(int eeaddress, byte* data, byte i, int num_chars)
   Wire.write((int)(eeaddress >> 8));   // MSB
   Wire.write((int)(eeaddress & 0xFF)); // LSB
   Wire.endTransmission();
-  
+
   Wire.requestFrom(ADDRESS, num_chars);
-  
+
   while (Wire.available()) {
     data[i++] = Wire.read();
   }
